@@ -1,0 +1,82 @@
+<?php
+
+$servername = "localhost";
+
+// REPLACE with your Database name
+$dbname = "id21287851_fastr";
+// REPLACE with Database user
+$username = "id21287851_fastr";
+// REPLACE with Database user password
+$password = "Gojozy1511;";
+
+// Keep this API Key value to be compatible with the ESP32 code provided in the project page. 
+// If you change this value, the ESP32 sketch needs to match
+$api_key_value = "tPmAT5Ab3j7F9";
+
+$api_key= $id_tag = $jarak = "";
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $api_key = test_input($_POST["api_key"]);
+    if($api_key == $api_key_value) {
+        $id_tag = test_input($_POST["id_tag"]);
+        $saldo = test_input($_POST["saldo"]);
+        var_dump($jarak);
+        // Create connection
+        $conn = mysqli_connect($servername, $username, $password, $dbname);
+        if (!$conn) {
+            die("Connection failed: " . $conn->connect_error);
+        }
+        $sdl = "SELECT * FROM user";
+if ($result = $conn->query($sdl)) {
+    while ($row = $result->fetch_assoc()) {
+        $row_id = $row["id_tag"];
+        $row_saldo = $row["saldo"];
+    }
+    $result->free();
+}
+
+if($row_id == $id_tag){
+    if($row_saldo >= 5){
+    $aksi1= 1;
+    $aksi2= 0;
+    $tagihan = 5;
+    $bayar = $row_saldo - $tagihan;
+        $sql = "UPDATE user SET saldo = '$bayar' WHERE id_tag = $id_tag";
+        $conn->query($sql) === TRUE;
+        $stl = "INSERT INTO logic (aksi)
+        VALUES ('" . $aksi1 . "')";
+        $conn->query($stl) === TRUE;
+    }
+    // else{
+    //     $stl = "UPDATE logic SET aksi = 0";
+    //     $conn->query($stl) === TRUE;
+    //     // $sdl = "INSERT INTO logic (aksi)
+    //     // VALUES ('" . $aksi2 . "')";
+    //     // $conn->query($sdl) === TRUE;
+    // }
+}
+if($row_saldo < 5){
+        $stl = "UPDATE logic SET aksi = 0";
+        $conn->query($stl) === TRUE;
+}
+    
+        $conn->close();
+    }
+    else {
+        echo "Wrong API Key provided.";
+    }
+
+}
+
+else{
+    echo "No data posted with HTTP POST.";
+}
+
+
+function test_input($data) {
+    $data = trim($data);
+    $data = stripslashes($data);
+    $data = htmlspecialchars($data);
+    return $data;
+}
+?>
